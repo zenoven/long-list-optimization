@@ -1,15 +1,34 @@
 <html>
 <head>
   <title>Long list optimization demo</title>
+  <style>
+    html,
+    body {
+      position: relative;
+    }
+    #info {
+      position: fixed;
+      width: 100%;
+      top: 20px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
 <ul id="wrapper"></ul>
+<div id="info">
+  <div id="counter"></div>
+  <div id="duration"></div>
+</div>
 <script>
-const itemsCount = 10000;
-const unitCount = 100;
+const itemsCount = 100000;
+const unitCount = 200;
 const itemContent = 'hello world!';
 const wrapper = document.getElementById('wrapper');
-const requestIdleCallback = window.requestIdleCallback || window.requestAnimationFrame || window.setTimeout;
+const counter = document.getElementById('counter');
+const duration = document.getElementById('duration');
+const startTime = new Date();
+let endTime;
 const insertItems = (count) => {
   while (count > 0) {
     const item = document.createElement('li');
@@ -20,16 +39,19 @@ const insertItems = (count) => {
 };
 
 const insertItemsAsync = (nextIndex = 0) => {
-  let nextIndex = 0;
   requestIdleCallback(() => {
-    let restCount = itemsCount - (nextIndex + 1)
+    let restCount = itemsCount - nextIndex;
     let nextUnitCount = restCount >= unitCount ? unitCount : restCount;
-    insertItems(nextUnitCount);
-    if (nextUnitCount >= 0) {
+    restCount !== itemsCount && (counter.innerHTML = itemsCount - restCount);
+    if (nextUnitCount > 0) {
+      insertItems(nextUnitCount);
       nextIndex += nextUnitCount;
       insertItemsAsync(nextIndex);
+    }else{
+      endTime = new Date();
+      duration.innerHTML = `耗时:${endTime - startTime}ms`
     }
-  }, 100);
+  }, {timeout: 20});
 };
 window.onload = () => {
   insertItemsAsync();
