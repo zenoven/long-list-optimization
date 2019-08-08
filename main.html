@@ -1,0 +1,39 @@
+<html>
+<head>
+  <title>Long list optimization demo</title>
+</head>
+<body>
+<ul id="wrapper"></ul>
+<script>
+const itemsCount = 10000;
+const unitCount = 100;
+const itemContent = 'hello world!';
+const wrapper = document.getElementById('wrapper');
+const requestIdleCallback = window.requestIdleCallback || window.requestAnimationFrame || window.setTimeout;
+const insertItems = (count) => {
+  while (count > 0) {
+    const item = document.createElement('li');
+    item.innerHTML = itemContent;
+    wrapper.appendChild(item);
+    count--;
+  }
+};
+
+const insertItemsAsync = (nextIndex = 0) => {
+  let nextIndex = 0;
+  requestIdleCallback(() => {
+    let restCount = itemsCount - (nextIndex + 1)
+    let nextUnitCount = restCount >= unitCount ? unitCount : restCount;
+    insertItems(nextUnitCount);
+    if (nextUnitCount >= 0) {
+      nextIndex += nextUnitCount;
+      insertItemsAsync(nextIndex);
+    }
+  }, 100);
+};
+window.onload = () => {
+  insertItemsAsync();
+};
+</script>
+</body>
+</html>
